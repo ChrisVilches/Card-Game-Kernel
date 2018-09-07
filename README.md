@@ -45,7 +45,9 @@ Since this software is a low level framework, one class has to be created for ea
 
 ## Proof of concept
 
-In order to prove this software can achieve a flexible way of developing any card game, where cards can have any imaginable behavior, a few proof of concept test cases were developed. Some of these were coded as tests and can be found [here](spec/proof_of_concept).
+In order to prove this software can achieve a flexible way of developing any card game, where cards can have any imaginable behavior, a few proof of concept test cases were developed. Some of these were coded as tests and can be found in the following link.
+
+[Code of some of these examples](spec/proof_of_concept)
 
 ### When card A is present, prevent the opponent from using cards of type B
 
