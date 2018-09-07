@@ -65,7 +65,6 @@ This event can be triggered from many places, and it depends on how you want to 
 *Bonus:* If you include the attacking card reference as part of the event arguments, you'll have access to that card from the card that receives damage, so you could also create something along the lines of:
 * If A receives damage by B, it will counterattack with 10% of the total damage.
 * If A dies (HP=0) while being attacked by B, B also dies (by triggering one of B's events).
-* (Example taken from Pokemon) If A dies (HP=0), A will go to the cemetery container, and a new state `withdrawing_prize` (in Pokemon you get one prize card every time you defeat an opponent's Pokemon) will be pushed to the global state stack, and then this state must be handled in a custom way by the application's logic.
 * More.
 
 ### Pushing a state that makes the application change its course (must be handled by the application logic)
@@ -77,7 +76,6 @@ There's a global data store (Redux is encouraged, although any can be used as lo
 Since cards can communicate with the global data, a card can directly push a new state onto the stack. The next part consists of handling each state by applying user defined logic, and this can be done *from outside* this framework. In other words, the user must use this as a library and build on top of it by adding logic. If we change the state from `stage3` to `choosing_card`, it's the duty of the user to implement, let's say, a GUI menu that shows every possible card to pick, and when it's done, pop the state and go back to `stage3`.
 
 If the card that triggered this state change wants to limit or filter out some cards (for example, choosing cards that are stronger than 120 is prohibited), we can also use the global data store and set a predicate (lambda function) there, so it can be accessed and used from outside. Just make sure the application logic knows about that predicate, so it can find and use it.
-
 
 ## Install
 
