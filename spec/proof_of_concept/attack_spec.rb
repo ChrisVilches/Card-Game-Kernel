@@ -30,7 +30,7 @@ class AttackerCard < Card
 
 end
 
-describe Container do
+describe Card do
   it "receives attack" do
     card = AttackerCard.new id: 11
     expect(card.attributes[:hp]).to eq 100
