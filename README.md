@@ -70,7 +70,7 @@ This event can be triggered from many places, and it depends on how you want to 
 
 ### Pushing a state that makes the application change its course (must be handled by the application logic)
 
-Each turn has several stages, `stage1`, `stage2`, `stage3`, and so on. Suddenly, something happens and a card has an event triggered, and within the event handler, it pushes a new state onto the history stack. This state makes the game change its course, and one of the player is now forced to withdraw a card from his deck.
+Each turn has several stages, `stage1`, `stage2`, `stage3`, and so on. Suddenly, something happens and a card has an event triggered, and within the event handler, it pushes a new state onto the history stack. This state makes the game change its course, and one of the players is now forced to withdraw a card from his deck. The game will only continue once he's done with this.
 
 There's a global data store (Redux is encouraged, although any can be used as long as it supplies the correct interface), and this can store any kind of data you want. In this case we need a state stack.
 
