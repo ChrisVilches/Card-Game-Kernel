@@ -8,13 +8,15 @@ end
 
 class Container
 
-  attr_reader :id, :cards
+  attr_reader :id, :cards, :containers
 
   def initialize(id:, global_hooks: nil)
     @cards = Array.new
     @id = id
     @global_hooks = global_hooks
     @global_hooks = GlobalHooks.new if @global_hooks.nil?
+	
+    @containers = Hash.new;
   end
 
   def add_card(card, from_container: nil)

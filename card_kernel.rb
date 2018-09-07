@@ -6,12 +6,20 @@ class ImpossibleTransfer < StandardError
   end
 end
 
+class ContainerNotFound < StandardError
+  def initialize(msg="Container not found")
+    super
+  end
+end
+
 
 class CardKernel
 
+  attr_reader :containers
+
   def initialize
     @global_hooks = GlobalHooks.new
-    @containers = Array.new
+    @containers = Hash.new
   end
 
   def transfer_by_ids!(prev_container_id:, next_container_id:, card_id:)
@@ -21,16 +29,12 @@ class CardKernel
       raise ImpossibleTransfer.new
     end
   end
+  
 
   def transfer_by_ids(prev_container_id:, next_container_id:, card_id:)
 
-    prev_container = @containers.select { |container| container.id == prev_container_id }
-    next_container = @containers.select { |container| container.id == next_container_id }
-
-    prev_container = prev_container.first
-    next_container = next_container.first
-
-    return { transfer: false } if prev_container.nil? || next_container.nil?
+    prev_container = find_container prev_container_id
+    next_container = find_container next_container_id
 
     index = nil
     (0..prev_container.cards.length-1).each do |i|
@@ -54,8 +58,46 @@ class CardKernel
 
   end
 
-  def add_container(container)
-    @containers << container
+  #def add_container(container)
+  #  @containers << container
+  #end
+  
+  def create_container(path)
+  
+    if path.length == 1
+      new_container = Container.new(id: path) # Remove ID
+      @containers[path.first] = new_container
+      return new_container
+    end
+
+    curr_container = @containers[path[0]]
+    raise ContainerNotFound if curr_container.nil?
+
+    (1..path.length-2).each do |i|      
+      curr_container = curr_container.containers[path[i]]
+      raise ContainerNotFound if curr_container.nil?
+    end
+     
+    new_container = Container.new(id: path) # Remove ID
+    curr_container.containers[path.last] = new_container
+
+    return new_container
+	
+  end
+  
+  def find_container(path)
+
+    curr_container = @containers[path[0]]
+    raise ContainerNotFound if curr_container.nil?
+    
+    return curr_container if path.length == 1
+    
+    (1..path.length-1).each do |i|      
+      curr_container = curr_container.containers[path[i]]
+      raise ContainerNotFound if curr_container.nil?
+    end
+
+    return curr_container
   end
 
 end

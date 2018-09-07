@@ -10,7 +10,7 @@ class CounterIncrementorCard < Card
     @pre[:transfer] = lambda { |args_|
 
       # If it's being moved to 1
-      if(args_[:next_container].id == 1)
+      if(args_[:next_container].id == [:a])
 
         # Add a pre_transfer to the global scope
         lambda_hook = lambda { |args|
@@ -46,19 +46,16 @@ describe CardKernel do
   it "should not increment anything until the card is present" do
 
     k = CardKernel.new
-
-    c1 = Container.new id: 1
-    c2 = Container.new id: 2
-
-    k.add_container c1
-    k.add_container c2
+    a = k.create_container [:a]
+    b = k.create_container [:a, :b]
 
     global_hooks = GlobalHooks.new
 
     card1 = CounterIncrementorCard.new id: 1, global_hooks: global_hooks
     card2 = Card.new id: 2, type: :countable_card, global_hooks: global_hooks
-    c2.add_card card1
-    c2.add_card card2
+    
+    b.add_card card1
+    b.add_card card2
 
     card1.trigger_event(:new_turn, { turn_number: 0 })
     card2.trigger_event(:new_turn, { turn_number: 0 })
@@ -80,7 +77,7 @@ describe CardKernel do
 
     expect(card2.attributes[:counter]).to be nil
 
-    k.transfer_by_ids!(prev_container_id: 2, next_container_id: 1, card_id: 1)
+    k.transfer_by_ids(prev_container_id: [:a, :b], next_container_id: [:a], card_id: 1)
 
     card1.trigger_event(:new_turn, { turn_number: 4 })
     card2.trigger_event(:new_turn, { turn_number: 4 })
