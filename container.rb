@@ -1,5 +1,11 @@
 require './card.rb'
 
+class NullCard < StandardError
+  def initialize(msg="Attempted to add a null card to a container")
+    super
+  end
+end
+
 class Container
 
   attr_reader :id, :cards
@@ -14,7 +20,7 @@ class Container
   def add_card(card, from_container: nil)
 
     if card.nil?
-      return { transfer: false }
+      raise NullCard.new
     end
 
     add_result = card.trigger_event(:transfer, {

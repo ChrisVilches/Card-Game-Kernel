@@ -1,5 +1,5 @@
-require_relative '../container'
-require_relative '../card'
+require_relative '../../container'
+require_relative '../../card'
 
 class AttackerCard < Card
 

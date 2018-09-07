@@ -20,4 +20,9 @@ describe Container do
     expect(c2.cards.length).to eq 0
   end
 
+  it "should raise an exception when adding a null card" do
+    cont = Container.new id: 1
+    expect{ cont.add_card nil }.to raise_error NullCard
+  end
+
 end

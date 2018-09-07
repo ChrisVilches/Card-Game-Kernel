@@ -1,40 +1,42 @@
-require_relative '../container'
-require_relative '../card'
-require_relative '../global_hooks'
-require_relative '../card_kernel'
+require_relative '../../container'
+require_relative '../../card'
+require_relative '../../global_hooks'
+require_relative '../../card_kernel'
 
 class PreventerCard < Card
   def initialize(id:, global_hooks: nil)
     super(id: id, global_hooks: global_hooks)
 
     # Execute this before transferring
-    @pre[:transfer] = lambda { |args|
-
-      # If it's being moved to 1
-      if(args[:next_container].id == 1)
-
-
-        # Add a pre_transfer to the global scope
-        lambda_hook = lambda { |args|
-
-          if (!args[:prev_container].nil? && args[:prev_container].id == 2) && args[:next_container].id == 3 && args[:card].type == :my_type
-            return false
-          end
-
-          return true
-        }
-
-        @global_hooks.append_hook(:pre, event_name: :transfer, fn: lambda_hook, card_owner_id: @id)
-
-      else
-
-        # If it wasn't moved to 1, then remove that pre_transfer
-        @global_hooks.remove_by_card_id(:pre, event_name: :transfer, card_owner_id: @id)
-      end
-
-    }
+    on :pre, :transfer, :on_transfer
 
   end
+
+
+  def on_transfer(args)
+    # If it's being moved to 1
+    if(args[:next_container].id == 1)
+
+
+      # Add a pre_transfer to the global scope
+      lambda_hook = lambda { |args|
+
+        if (!args[:prev_container].nil? && args[:prev_container].id == 2) && args[:next_container].id == 3 && args[:card].type == :my_type
+          return false
+        end
+
+        return true
+      }
+
+      @global_hooks.append_hook(:pre, event_name: :transfer, fn: lambda_hook, card_owner_id: @id)
+
+    else
+      # If it wasn't moved to 1, then remove that pre_transfer
+      @global_hooks.remove_by_card_id(:pre, event_name: :transfer, card_owner_id: @id)
+    end
+
+  end
+
 end
 
 

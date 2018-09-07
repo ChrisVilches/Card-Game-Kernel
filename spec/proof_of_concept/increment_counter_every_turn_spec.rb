@@ -1,7 +1,7 @@
-require_relative '../container'
-require_relative '../card'
-require_relative '../global_hooks'
-require_relative '../card_kernel'
+require_relative '../../container'
+require_relative '../../card'
+require_relative '../../global_hooks'
+require_relative '../../card_kernel'
 
 class CounterIncrementorCard < Card
   def initialize(id:, global_hooks: nil)
