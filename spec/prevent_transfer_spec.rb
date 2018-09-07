@@ -63,7 +63,7 @@ describe CardKernel do
     expect(cont2.cards.length).to eq 0
     expect(cont3.cards.length).to eq 0
 
-    k.transfer_by_ids(prev_container_id: 1, next_container_id: 2, card_id: 22)
+    k.transfer_by_ids!(prev_container_id: 1, next_container_id: 2, card_id: 22)
 
     expect(cont1.cards.length).to eq 1
     expect(cont2.cards.length).to eq 1
@@ -77,13 +77,13 @@ describe CardKernel do
 
     # Move card1 away from container1, so now it doesn't prevent card2 from transferring
 
-    k.transfer_by_ids(prev_container_id: 1, next_container_id: 2, card_id: 11)
+    k.transfer_by_ids!(prev_container_id: 1, next_container_id: 2, card_id: 11)
 
     expect(cont1.cards.length).to eq 0
     expect(cont2.cards.length).to eq 2
     expect(cont3.cards.length).to eq 0
 
-    k.transfer_by_ids(prev_container_id: 2, next_container_id: 3, card_id: 22)
+    k.transfer_by_ids!(prev_container_id: 2, next_container_id: 3, card_id: 22)
 
     expect(cont1.cards.length).to eq 0
     expect(cont2.cards.length).to eq 1
@@ -91,7 +91,7 @@ describe CardKernel do
 
     # Move again back to the prevention position
 
-    k.transfer_by_ids(prev_container_id: 2, next_container_id: 1, card_id: 11)
+    k.transfer_by_ids!(prev_container_id: 2, next_container_id: 1, card_id: 11)
 
     expect(cont1.cards.length).to eq 1
     expect(cont2.cards.length).to eq 0
@@ -99,7 +99,7 @@ describe CardKernel do
 
     # It can move because the prevention is unidirectional
 
-    k.transfer_by_ids(prev_container_id: 3, next_container_id: 2, card_id: 22)
+    k.transfer_by_ids!(prev_container_id: 3, next_container_id: 2, card_id: 22)
 
     expect(cont1.cards.length).to eq 1
     expect(cont2.cards.length).to eq 1

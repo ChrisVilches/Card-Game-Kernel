@@ -1,10 +1,25 @@
 require './global_hooks.rb'
 
+class ImpossibleTransfer < StandardError
+  def initialize(msg="Transference is impossible to perform")
+    super
+  end
+end
+
+
 class CardKernel
 
   def initialize
     @global_hooks = GlobalHooks.new
     @containers = Array.new
+  end
+
+  def transfer_by_ids!(prev_container_id:, next_container_id:, card_id:)
+    result = transfer_by_ids(prev_container_id: prev_container_id, next_container_id: next_container_id, card_id: card_id)
+
+    if result.is_a?(Hash) && result[:transfer] == false
+      raise ImpossibleTransfer.new
+    end
   end
 
   def transfer_by_ids(prev_container_id:, next_container_id:, card_id:)
@@ -34,7 +49,7 @@ class CardKernel
       prev_container.cards.delete_at(index)
     end
 
-
+    return { transfer: false } if transfer_result == false
     return transfer_result
 
   end

@@ -80,7 +80,7 @@ describe CardKernel do
 
     expect(card2.attributes[:counter]).to be nil
 
-    k.transfer_by_ids(prev_container_id: 2, next_container_id: 1, card_id: 1)
+    k.transfer_by_ids!(prev_container_id: 2, next_container_id: 1, card_id: 1)
 
     card1.trigger_event(:new_turn, { turn_number: 4 })
     card2.trigger_event(:new_turn, { turn_number: 4 })
