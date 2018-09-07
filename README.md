@@ -9,6 +9,7 @@
   * [When card A is present, prevent the opponent from using cards of type B](#when-card-a-is-present-prevent-the-opponent-from-using-cards-of-type-b)
   * [Increment a card's counter every turn](#increment-a-cards-counter-every-turn)
   * [Attack the opponent's card](#attack-the-opponents-card)
+  * [Pushing a state that makes the application change its course (must be handled by the application logic)](#pushing-a-state-that-makes-the-application-change-its-course-must-be-handled-by-the-application-logic)
 - [Install](#install)
 - [Tests](#tests)
 
@@ -66,6 +67,16 @@ This event can be triggered from many places, and it depends on how you want to 
 * If A dies (HP=0) while being attacked by B, B also dies (by triggering one of B's events).
 * (Example taken from Pokemon) If A dies (HP=0), A will go to the cemetery container, and a new state `withdrawing_prize` (in Pokemon you get one prize card every time you defeat an opponent's Pokemon) will be pushed to the global state stack, and then this state must be handled in a custom way by the application's logic.
 * More.
+
+### Pushing a state that makes the application change its course (must be handled by the application logic)
+
+Each turn has several stages, `stage1`, `stage2`, `stage3`, and so on. Suddenly, something happens and a card has an event triggered, and within the event handler, it pushes a new state onto the history stack. This state makes the game change its course, and one of the player is now forced to withdraw a card from his deck.
+
+There's a global data store (Redux is encouraged, although any can be used as long as it supplies the correct interface), and this can store any kind of data you want. In this case we need a state stack.
+
+Since cards can communicate with the global data, a card can directly push a new state onto the stack. The next part consists of handling each state by applying user defined logic, and this can be done *from outside* this framework. In other words, the user must use this as a library and build on top of it by adding logic. If we change the state from `stage3` to `choosing_card`, it's the duty of the user to implement, let's say, a GUI menu that shows every possible card to pick, and when it's done, pop the state and go back to `stage3`.
+
+If the card that triggered this state change wants to limit or filter out some cards (for example, choosing cards that are stronger than 120 is prohibited), we can also use the global data store and set a predicate (lambda function) there, so it can be accessed and used from outside. Just make sure the application logic knows about that predicate, so it can find and use it.
 
 
 ## Install
