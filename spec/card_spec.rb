@@ -12,13 +12,13 @@ describe Card do
     card = Card.new id: 1
     c1.add_card card
     event_result = c1.transfer_by_id(card_id: 1, to: c2)
-    expect(event_result[:prev_container]).to eq 11
-    expect(event_result[:next_container]).to eq 22
+    expect(event_result[:prev_container].id).to eq 11
+    expect(event_result[:next_container].id).to eq 22
     expect(event_result[:transfer]).to be true
 
     event_result = c2.transfer_by_id(card_id: 1, to: c1)
-    expect(event_result[:prev_container]).to eq 22
-    expect(event_result[:next_container]).to eq 11
+    expect(event_result[:prev_container].id).to eq 22
+    expect(event_result[:next_container].id).to eq 11
     expect(event_result[:transfer]).to be true
   end
 
@@ -28,8 +28,8 @@ describe Card do
     card = Card.new id: 1
     c1.add_card card
     event_result = c1.transfer_by_id(card_id: 1, to: c1)
-    expect(event_result[:prev_container]).to eq 11
-    expect(event_result[:next_container]).to eq 11
+    expect(event_result[:prev_container].id).to eq 11
+    expect(event_result[:next_container].id).to eq 11
     expect(event_result[:transfer]).to be true
   end
 
