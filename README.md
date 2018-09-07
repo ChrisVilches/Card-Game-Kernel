@@ -35,9 +35,12 @@ This little software contains a framework where it's possible to design and code
 
 * You can create your own `events` and then trigger them whenever you want.
 * Cards are divided into `containers` which are a more generic way of dividing a deck into your hand, the opponent's hand, disposed cards, etc.
-* It manages data and state globally using Redux.
+* Containers can be nested, and they can be found by their path, e.g. `[:player1, :hand]` or `[:player2, :cemetery]`
+* It manages data and state globally using Redux (or a similar data store).
 * Attributes can be added dynamically to cards.
 * Events can have `pre` and `post` hooks so you can control the execution with detail.
+* Generic, unopinionated solution.
+* It can also be used for games that require a similar mechanism, like Final Fantasy or Pokemon battle systems, which require to implement many techniques and movements which behavior differ significantly from each other and there's no standard reusable model.
 
 This is a very low level software, and therefore in order to work with it, further layers of abstraction must be written by the developer. This engine doesn't even force you to implement the concept of `turns` or `deck`. You simply have a few data structures that communicate with each other, and you must write the rest of the logic yourself.
 
