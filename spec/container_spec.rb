@@ -26,63 +26,46 @@ describe Container do
     expect{ cont.add_card nil }.to raise_error NullCard
   end
   
-  it "should create nested containers" do
-    k = CardKernel.new
-    k.create_container [:main]    
-    k.create_container [:main, :other]
-    k.create_container [:main, :computer]
-    k.create_container [:main, :other, :next]
-    k.create_container [:main, :other, :hello]
-    
-    expect(k.containers.size).to eq 1
-    expect(k.containers[:main].containers.size).to eq 2
-    expect(k.containers[:main].containers[:other].containers.size).to eq 2
-    expect(k.containers[:main].containers[:computer].containers.size).to eq 0
-  end
+  describe "nested containers" do
   
-  it "should create nested containers with correct IDs" do
-    k = CardKernel.new
-    k.create_container [:main]    
-    k.create_container [:main, :other]
-    k.create_container [:main, :other, :hello]
-    
-    expect(k.find_container([:main]).id).to eq [:main]
-    expect(k.find_container([:main, :other]).id).to eq [:main, :other]
-    expect(k.find_container([:main, :other, :hello]).id).to eq [:main, :other, :hello]
-  end
+    before(:each) do
+      @k = CardKernel.new
+      @main = @k.create_container [:main]    
+      @other = @k.create_container [:main, :other]
+      @computer = @k.create_container [:main, :computer]
+      @next_ = @k.create_container [:main, :other, :next]
+      @hello = @k.create_container [:main, :other, :hello]
+    end
   
-  it "should not create nested containers if there's an error in the path" do
-    k = CardKernel.new
-    k.create_container [:main]    
-    k.create_container [:main, :other]
-    expect{ k.create_container [:main, :hello, :world] }.to raise_error ContainerNotFound
-  end
-  
-  it "should find nested containers correctly" do
-    k = CardKernel.new
-    main = k.create_container [:main]    
-    other = k.create_container [:main, :other]
-    computer = k.create_container [:main, :computer]
-    next_ = k.create_container [:main, :other, :next]
-    hello = k.create_container [:main, :other, :hello]
+    it "should create nested containers" do     
+      expect(@k.containers.size).to eq 1
+      expect(@k.containers[:main].containers.size).to eq 2
+      expect(@k.containers[:main].containers[:other].containers.size).to eq 2
+      expect(@k.containers[:main].containers[:computer].containers.size).to eq 0
+    end
     
-    expect(k.find_container [:main]).to be main
-    expect(k.find_container [:main, :other]).to be other
-    expect(k.find_container [:main, :computer]).to be computer
-    expect(k.find_container [:main, :other, :next]).to be next_
-    expect(k.find_container [:main, :other, :hello]).to be hello
-  end
-  
-    it "should raise an error when trying to find a nested container that doesn't exist" do
-    k = CardKernel.new
-    k.create_container [:main]    
-    k.create_container [:main, :other]
-    k.create_container [:main, :computer]
+    it "should not create nested containers if there's an error in the path" do
+      @k = CardKernel.new
+      @k.create_container [:main]    
+      @k.create_container [:main, :other]
+      expect{ @k.create_container [:main, :hello, :world] }.to raise_error ContainerNotFound
+    end
     
-    expect{ k.find_container [:mainx] }.to raise_error ContainerNotFound
-    expect{ k.find_container [:main, :other, :a] }.to raise_error ContainerNotFound
+    it "should find nested containers correctly" do
+      expect(@k.find_container [:main]).to be @main
+      expect(@k.find_container [:main, :other]).to be @other
+      expect(@k.find_container [:main, :computer]).to be @computer
+      expect(@k.find_container [:main, :other, :next]).to be @next_
+      expect(@k.find_container [:main, :other, :hello]).to be @hello
+    end
+    
+      it "should raise an error when trying to find a nested container that doesn't exist" do     
+      expect{ @k.find_container [:mainx] }.to raise_error ContainerNotFound
+      expect{ @k.find_container [:main, :other, :a] }.to raise_error ContainerNotFound
 
+    end
   end
+  
 
 
 end

@@ -74,13 +74,13 @@ describe CardKernel do
 
     # Move card1 away from container1, so now it doesn't prevent card2 from transferring
 
-    k.transfer_by_ids!(prev_container_id: [:a], next_container_id: [:b], card_id: 11)
+    k.transfer_by_ids(prev_container_id: [:a], next_container_id: [:b], card_id: 11)
 
     expect(a.cards.length).to eq 0
     expect(b.cards.length).to eq 2
     expect(c.cards.length).to eq 0
 
-    k.transfer_by_ids!(prev_container_id: [:b], next_container_id: [:b, :c], card_id: 22)
+    k.transfer_by_ids(prev_container_id: [:b], next_container_id: [:b, :c], card_id: 22)
 
     expect(a.cards.length).to eq 0
     expect(b.cards.length).to eq 1
@@ -88,7 +88,7 @@ describe CardKernel do
 
     # Move again back to the prevention position
 
-    k.transfer_by_ids!(prev_container_id: [:b], next_container_id: [:a], card_id: 11)
+    k.transfer_by_ids(prev_container_id: [:b], next_container_id: [:a], card_id: 11)
 
     expect(a.cards.length).to eq 1
     expect(b.cards.length).to eq 0
@@ -96,7 +96,7 @@ describe CardKernel do
 
     # It can move because the prevention is unidirectional
 
-    k.transfer_by_ids!(prev_container_id: [:b, :c], next_container_id: [:b], card_id: 22)
+    k.transfer_by_ids(prev_container_id: [:b, :c], next_container_id: [:b], card_id: 22)
 
     expect(a.cards.length).to eq 1
     expect(b.cards.length).to eq 1

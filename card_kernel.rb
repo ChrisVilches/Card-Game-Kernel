@@ -22,14 +22,6 @@ class CardKernel
     @containers = Hash.new
   end
 
-  def transfer_by_ids!(prev_container_id:, next_container_id:, card_id:)
-    result = transfer_by_ids(prev_container_id: prev_container_id, next_container_id: next_container_id, card_id: card_id)
-
-    if result.is_a?(Hash) && result[:transfer] == false
-      raise ImpossibleTransfer.new
-    end
-  end
-  
 
   def transfer_by_ids(prev_container_id:, next_container_id:, card_id:)
 
@@ -58,9 +50,6 @@ class CardKernel
 
   end
 
-  #def add_container(container)
-  #  @containers << container
-  #end
   
   def create_container(path)
   

@@ -39,9 +39,5 @@ class Container
 
   end
 
-  private
-  def transfer(card:, to:)
-    return to.add_card(card, from_container: self)
-  end
 
 end
