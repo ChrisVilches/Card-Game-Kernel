@@ -2,7 +2,6 @@ require_relative '../card'
 require_relative '../card_kernel'
 require_relative '../container'
 
-
 class DataSenderCard < Card
   def initialize(id: 1, set_data_callback: nil, get_data_callback: nil)
     super
@@ -36,8 +35,6 @@ class DataSenderCard < Card
     on :pre, :wrong_event_handler, lambda { |args| return }
   end
 end
-
-
 
 describe Card do
 
