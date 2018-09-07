@@ -17,7 +17,11 @@ class Container
       return { transfer: false }
     end
 
-    add_result = card.trigger_event(:transfer, { prev_container: from_container.nil?? nil : from_container, next_container: self })
+    add_result = card.trigger_event(:transfer, {
+      prev_container: from_container.nil?? nil : from_container,
+      next_container: self
+      }
+    )
 
     if add_result != false && add_result[:transfer] == true
       @cards << card

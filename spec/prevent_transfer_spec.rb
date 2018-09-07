@@ -38,7 +38,7 @@ class PreventerCard < Card
 end
 
 
-describe Container do
+describe CardKernel do
   it "card1 prevents card2 from transferring (if card1 is in 1 and card2 moves from 2 to 3)" do
 
     k = CardKernel.new

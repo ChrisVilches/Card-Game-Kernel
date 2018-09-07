@@ -13,8 +13,6 @@ class Card
     @post = Hash.new
     @global_hooks = global_hooks
 
-    @global_hooks = GlobalHooks.new if @global_hooks.nil?
-
     on(:transfer, lambda{ |args| return args.merge({ transfer: true }) })
   end
 
@@ -25,8 +23,10 @@ class Card
 
   def trigger_event(event_name, arguments = {})
 
+    arguments[:card] = self
+
     global_pre = {}
-    global_pre = @global_hooks.merge_all(:pre, event_name: event_name, arguments: arguments)
+    global_pre = @global_hooks.merge_all(:pre, event_name: event_name, arguments: arguments) if !@global_hooks.nil?
 
     scope_pre = {}
     scope_pre = @pre[event_name].call(arguments) if @pre.has_key?(event_name)
@@ -41,9 +41,10 @@ class Card
 
     arguments = args
 
-    result = @events[event_name].call(arguments)
+    result = {}
+    result = @events[event_name].call(arguments) if @events.has_key?(event_name)
 
-    @global_hooks.merge_all(:post, event_name: event_name, arguments: arguments)
+    @global_hooks.merge_all(:post, event_name: event_name, arguments: arguments) if !@global_hooks.nil?
     @post[event_name].call(arguments) if @post.has_key?(event_name)
 
     return result
