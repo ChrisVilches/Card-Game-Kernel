@@ -3,8 +3,8 @@ require_relative '../card'
 
 class AttackerCard < Card
 
-  def initialize(id:, global_state: nil)
-    super(id: id, global_state: global_state)
+  def initialize(id:, global_hooks: nil)
+    super(id: id, global_hooks: global_hooks)
     set_attributes({ hp: 100 })
     on(:receive_attack, lambda { |args|
 
@@ -53,15 +53,12 @@ describe Container do
 
   it "receives attack and counterattacks, but with a global multiplier, affecting only the attack (not counterattack)" do
 
-    global_state = {
-      pre: {
-        receive_attack_counterattack: [{ hook_id: 111, fn: lambda { |args| return { damage_multiplier: 2 } } }],
-        this_shouldnt_execute: [{ hook_id: 222, fn: lambda { |args| puts "+-+-+-+-+-+-+-+-+-"; return false } }]
-      }
-    }
+    global_hooks = GlobalHooks.new
+    global_hooks.append_hook(:pre, event_name: :receive_attack_counterattack, fn: lambda { |args| return { damage_multiplier: 2 } })
+    global_hooks.append_hook(:pre, event_name: :this_shouldnt_execute, fn: lambda { |args| puts "+-+-+-+-+-+-+-+-+-"; return false })
 
-    card1 = AttackerCard.new(id: 11, global_state: global_state)
-    card2 = AttackerCard.new(id: 22, global_state: global_state)
+    card1 = AttackerCard.new(id: 11, global_hooks: global_hooks)
+    card2 = AttackerCard.new(id: 22, global_hooks: global_hooks)
     expect(card1.attributes[:hp]).to eq 100
     expect(card2.attributes[:hp]).to eq 100
     card1.trigger_event(:receive_attack_counterattack, {

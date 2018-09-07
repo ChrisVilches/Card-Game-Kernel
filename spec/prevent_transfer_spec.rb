@@ -1,10 +1,10 @@
 require_relative '../container'
 require_relative '../card'
-
+require_relative '../global_hooks'
 
 class PreventerCard < Card
-  def initialize(id:, global_state: nil)
-    super(id: id, global_state: global_state)
+  def initialize(id:, global_hooks: nil)
+    super(id: id, global_hooks: global_hooks)
 
     # Execute this before transferring
     @pre[:transfer] = lambda { |args|
@@ -12,36 +12,23 @@ class PreventerCard < Card
       # If it's being moved to 1
       if(args[:next_container].id == 1)
 
-        @global_state[:pre] = {} if !@global_state.has_key?(:pre)
-        @global_state[:pre][:transfer] = [] if !@global_state[:pre].has_key?(:transfer)
 
         # Add a pre_transfer to the global scope
-        @global_state[:pre][:transfer] << {
+        lambda_hook = lambda { |args|
 
-          card_id: @id,
+          if args[:next_container].id == 3 && args[:card].type == :my_type
+            return false
+          end
 
-          fn: lambda { |args|
-
-            if args[:next_container].id == 3 && args[:card].type == :my_type
-              return false
-            end
-
-            return true
-          }
+          return true
         }
+
+        @global_hooks.append_hook(:pre, event_name: :transfer, fn: lambda_hook, card_owner_id: @id)
+
       else
 
         # If it wasn't moved to 1, then remove that pre_transfer
-        remove_index = nil
-        @global_state[:pre][:transfer].each_with_index do |x, i|
-
-          if(x[:card_id] == @id)
-            remove_index = i
-            break
-          end
-
-        end
-        @global_state[:pre][:transfer].delete_at remove_index
+        @global_hooks.remove_by_card_id(:pre, event_name: :transfer, card_owner_id: @id)
       end
 
     }
@@ -53,15 +40,14 @@ end
 describe Container do
   it "card1 prevents card2 from transferring (if card1 is in 1 and card2 moves from 2 to 3)" do
 
-    global_state = Hash.new
-    global_state[:pre] = {}
+    global_hooks = GlobalHooks.new
 
-    cont1 = Container.new(id: 1, global_state: global_state)
-    cont2 = Container.new(id: 2, global_state: global_state)
-    cont3 = Container.new(id: 3, global_state: global_state)
+    cont1 = Container.new(id: 1, global_hooks: global_hooks)
+    cont2 = Container.new(id: 2, global_hooks: global_hooks)
+    cont3 = Container.new(id: 3, global_hooks: global_hooks)
 
-    card1 = PreventerCard.new(id: 11, global_state: global_state)
-    card2 = Card.new(id: 22, type: :my_type, global_state: global_state)
+    card1 = PreventerCard.new(id: 11, global_hooks: global_hooks)
+    card2 = Card.new(id: 22, type: :my_type, global_hooks: global_hooks)
 
     cont1.add_card card1
     cont1.add_card card2
