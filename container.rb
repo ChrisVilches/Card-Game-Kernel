@@ -17,35 +17,13 @@ class Container
       return { transfer: false }
     end
 
-    result_pre_transfer = @global_hooks.merge_all(:pre, event_name: :transfer, arguments: { card: card, prev_container: from_container, next_container: self })
-    return transfer(card: nil, to: to) if result_pre_transfer == false
+    add_result = card.trigger_event(:transfer, { prev_container: from_container.nil?? nil : from_container, next_container: self })
 
-
-    @cards << card
-
-    return card.trigger_event(:transfer, { prev_container: from_container.nil?? nil : from_container, next_container: self })
-  end
-
-
-
-
-  def transfer_by_id(to:, card_id:)
-    index = nil
-    (0..@cards.length-1).each do |i|
-      if @cards[i].id == card_id
-        index = i
-        break
-      end
+    if add_result != false && add_result[:transfer] == true
+      @cards << card
     end
-    return transfer(card: nil, to: to) if index == nil
-    card = @cards[index]
 
-
-    result_pre_transfer = @global_hooks.merge_all(:pre, event_name: :transfer, arguments: { card: card, prev_container: self, next_container: to })
-    return transfer(card: nil, to: to) if result_pre_transfer == false
-
-    @cards.delete_at(index)
-    return transfer(card: card, to: to)
+    return add_result
 
   end
 

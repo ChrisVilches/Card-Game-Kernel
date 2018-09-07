@@ -1,3 +1,5 @@
+require './global_hooks.rb'
+
 class Card
 
   attr_reader :id, :attributes, :type
@@ -13,7 +15,7 @@ class Card
 
     @global_hooks = GlobalHooks.new if @global_hooks.nil?
 
-    on(:transfer, lambda{ |args| return args })
+    on(:transfer, lambda{ |args| return args.merge({ transfer: true }) })
   end
 
   def on(event_name, call_back)
@@ -21,9 +23,7 @@ class Card
   end
 
 
-
   def trigger_event(event_name, arguments = {})
-
 
     global_pre = {}
     global_pre = @global_hooks.merge_all(:pre, event_name: event_name, arguments: arguments)
@@ -31,8 +31,8 @@ class Card
     scope_pre = {}
     scope_pre = @pre[event_name].call(arguments) if @pre.has_key?(event_name)
 
-    return nil if global_pre == false
-    return nil if scope_pre == false
+    return false if global_pre == false
+    return false if scope_pre == false
 
     args = {}
     args = args.merge(global_pre) if global_pre.is_a?(Hash)
@@ -43,11 +43,10 @@ class Card
 
     result = @events[event_name].call(arguments)
 
-
     @global_hooks.merge_all(:post, event_name: event_name, arguments: arguments)
     @post[event_name].call(arguments) if @post.has_key?(event_name)
 
-    return result.merge({ transfer: true })
+    return result
   end
 
   def set_state
