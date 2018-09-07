@@ -20,10 +20,43 @@ class Card
     @events[event_name] = call_back
   end
 
+  def merge_all_global(array, arguments)
+
+    return true if array == nil
+
+    results = {}
+
+    array.each do |hook|
+
+      res = hook[:fn].call(arguments)
+      if res == false
+        return false
+      end
+
+      if res.is_a?(Hash)
+        results = results.merge(res)
+      end
+
+    end
+
+
+    return results
+  end
+
   def trigger_event(event_name, arguments = {})
 
+    require 'pp'
+
     global_pre = {}
-    global_pre = @global_state[:pre][event_name].call(arguments) if @global_state.has_key?(:pre) && @global_state[:pre].has_key?(event_name)
+
+    begin
+      if !@global_state[:pre][event_name].is_a?(Array)
+        @global_state[:pre][event_name] = []
+      end
+      rescue
+    end
+
+    global_pre = merge_all_global(@global_state[:pre][event_name], arguments) if @global_state.has_key?(:pre) && @global_state[:pre].has_key?(event_name)
 
     scope_pre = {}
     scope_pre = @pre[event_name].call(arguments) if @pre.has_key?(event_name)
@@ -41,7 +74,7 @@ class Card
     result = @events[event_name].call(arguments)
 
 
-    @global_state[:post][event_name].call(arguments) if @global_state.has_key?(:post) && @global_state[:post].has_key?(event_name)
+    merge_all_global(@global_state[:post][event_name], arguments) if @global_state.has_key?(:post) && @global_state[:post].has_key?(event_name)
     @post[event_name].call(arguments) if @post.has_key?(event_name)
 
     return result.merge({ transfer: true })

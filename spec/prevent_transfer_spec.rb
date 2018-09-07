@@ -6,11 +6,21 @@ class PreventerCard < Card
   def initialize(id:, global_state: nil)
     super(id: id, global_state: global_state)
 
+    # Execute this before transferring
     @pre[:transfer] = lambda { |args|
 
+      # If it's being moved to 1
       if(args[:next_container].id == 1)
-        @global_state[:pre] = {
-          transfer: lambda { |args|
+
+        @global_state[:pre] = {} if !@global_state.has_key?(:pre)
+        @global_state[:pre][:transfer] = [] if !@global_state[:pre].has_key?(:transfer)
+
+        # Add a pre_transfer to the global scope
+        @global_state[:pre][:transfer] << {
+
+          card_id: @id,
+
+          fn: lambda { |args|
 
             if args[:next_container].id == 3 && args[:card].type == :my_type
               return false
@@ -20,7 +30,18 @@ class PreventerCard < Card
           }
         }
       else
-        @global_state[:pre] = {}
+
+        # If it wasn't moved to 1, then remove that pre_transfer
+        remove_index = nil
+        @global_state[:pre][:transfer].each_with_index do |x, i|
+
+          if(x[:card_id] == @id)
+            remove_index = i
+            break
+          end
+
+        end
+        @global_state[:pre][:transfer].delete_at remove_index
       end
 
     }

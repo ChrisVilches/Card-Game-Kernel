@@ -55,8 +55,8 @@ describe Container do
 
     global_state = {
       pre: {
-        receive_attack_counterattack: lambda { |args| return { damage_multiplier: 2 } },
-        this_shouldnt_execute: lambda { |args| puts "+-+-+-+-+-+-+-+-+-"; return false }
+        receive_attack_counterattack: [{ hook_id: 111, fn: lambda { |args| return { damage_multiplier: 2 } } }],
+        this_shouldnt_execute: [{ hook_id: 222, fn: lambda { |args| puts "+-+-+-+-+-+-+-+-+-"; return false } }]
       }
     }
 

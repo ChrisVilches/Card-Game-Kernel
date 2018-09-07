@@ -24,7 +24,9 @@ class Container
       pre_transfer = pre[:transfer]
       break if pre_transfer.nil?
 
-      result_pre_transfer = pre_transfer.call({ card: card, prev_container: from_container, next_container: self })
+      #result_pre_transfer = pre_transfer.call({ card: card, prev_container: from_container, next_container: self })
+
+      result_pre_transfer = merge_all_global(pre_transfer, { card: card, prev_container: from_container, next_container: self }) 
 
       return { transfer: false } if result_pre_transfer == false
     end
@@ -33,6 +35,27 @@ class Container
     @cards << card
 
     return card.trigger_event(:transfer, { prev_container: from_container.nil?? nil : from_container, next_container: self })
+  end
+
+
+  def merge_all_global(array, arguments)
+
+    results = {}
+
+    array.each do |hook|
+
+      res = hook[:fn].call(arguments)
+      if res == false
+        return false
+      end
+
+      if res.is_a?(Hash)
+        results = results.merge(res)
+      end
+
+    end
+
+    return results
   end
 
   def transfer_by_id(to:, card_id:)
@@ -53,7 +76,9 @@ class Container
       pre_transfer = pre[:transfer]
       break if pre_transfer.nil?
 
-      result_pre_transfer = pre_transfer.call({ card: card, prev_container: self, next_container: to })
+      #result_pre_transfer = pre_transfer.call({ card: card, prev_container: self, next_container: to })
+
+      result_pre_transfer = merge_all_global(pre_transfer, { card: card, prev_container: self, next_container: to })
 
       return transfer(card: nil, to: to) if result_pre_transfer == false
     end
