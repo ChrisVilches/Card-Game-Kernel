@@ -19,32 +19,6 @@ class Card
   end
 
 
-  # Registers an event handler for a specific event.
-  #
-  # == Parameters:
-  # pre_post::
-  #   (Optional) A Symbol declaring whether the hook is pre or post.
-  # event_name::
-  #   A Symbol declaring the event name.
-  # call_back::
-  #   A lambda function or a class method symbol that gets executed whenever the event is triggered. This function can receive parameters.
-  #
-  def on(*args)
-
-    if args.length == 3
-      return set_hook(*args)
-    end
-
-    event_name = args[0]
-    call_back = args[1]
-
-    if call_back.respond_to? :call
-      @events[event_name] = call_back
-    else
-      @events[event_name] = method(call_back)
-    end
-  end
-
   # Triggers a custom event for this card. It executes its previously defined event handler.
   # The execution of the event handler will be preceded by the pre and post hooks.
   #
@@ -102,6 +76,36 @@ class Card
 
 
   private
+
+  # Registers an event handler for a specific event.
+  #
+  # == Parameters:
+  # pre_post::
+  #   (Optional) A Symbol declaring whether the hook is pre or post.
+  # event_name::
+  #   A Symbol declaring the event name.
+  # call_back::
+  #   A lambda function or a class method symbol that gets executed whenever the event is triggered. This function can receive parameters.
+  #
+  def on(*args)
+
+    if args.length == 3
+      return set_hook(*args)
+    end
+
+    event_name = args[0]
+    call_back = args[1]
+
+    if call_back.respond_to? :call
+      @events[event_name] = call_back
+    else
+      @events[event_name] = method(call_back)
+    end
+  end
+
+
+
+
   def set_hook(pre_post, event_name, call_back)
     call_back = method(call_back) if !call_back.respond_to? :call
     hook_hash = (pre_post == :pre)? @pre : @post
