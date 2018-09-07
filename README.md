@@ -16,7 +16,7 @@
 
 ## Introduction
 
-A flexible engine for creating card games (Pokemon, Magic, etc) where the behavior of each card can be anything.
+A flexible engine for creating card games (Pokemon, Magic, etc) where the behavior of each card can be completely arbitrary.
 
 ### The problem
 
