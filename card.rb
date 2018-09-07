@@ -6,7 +6,7 @@ class Card
 
   attr_reader :id, :attributes, :type
 
-  def initialize(id:, type: nil, global_hooks: nil)
+  def initialize(id:, type: nil, global_hooks: nil, set_data_callback: nil, get_data_callback: nil)
     @id = id
     @type = type
     @events = Hash.new
@@ -14,6 +14,12 @@ class Card
     @pre = Hash.new
     @post = Hash.new
     @global_hooks = global_hooks
+
+    raise ArgumentError.new("Data setter callback should have an arity of 2") if !set_data_callback.nil? && set_data_callback.arity != 2
+    raise ArgumentError.new("Data getter callback should have an arity of 0") if !get_data_callback.nil? && get_data_callback.arity != 0
+
+    @set_data_callback = set_data_callback
+    @get_data_callback = get_data_callback
 
     on(:transfer, lambda { |args| return args.merge({ transfer: true }) })
   end
@@ -95,20 +101,38 @@ class Card
 
     event_name = args[0]
     call_back = args[1]
+    function = nil
 
     if call_back.respond_to? :call
-      @events[event_name] = call_back
+      function = call_back
     else
-      @events[event_name] = method(call_back)
+      function = method(call_back)
     end
+
+    raise ArgumentError.new("Event handlers need to have one argument") if function.arity != 1
+
+    @events[event_name] = function
+
   end
 
 
+  def set_data(action:, arguments: {})
+    return if @set_data_callback.nil?
+    @set_data_callback.call(action, arguments)
+  end
+
+  def get_data
+    return @get_data_callback.call if !@get_data_callback.nil?
+    return nil
+  end
 
 
   def set_hook(pre_post, event_name, call_back)
     call_back = method(call_back) if !call_back.respond_to? :call
     hook_hash = (pre_post == :pre)? @pre : @post
+
+    raise ArgumentError.new("Pre and post hooks need to have one argument") if call_back.arity != 1
+
     hook_hash[:transfer] = call_back
     hook_hash.delete :transfer if call_back.nil?
   end
