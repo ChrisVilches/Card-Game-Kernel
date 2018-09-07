@@ -19,6 +19,11 @@
 
 A flexible engine for creating card games (Pokemon, Magic, etc) where the behavior of each card can be completely arbitrary.
 
+<p align="center">
+  <img src="magic.jpg" width="256" title="Magic card game">
+</p>
+
+
 ### The problem
 
 Card games like Pokemon, Magic, Mitos y Leyendas, etc. are very difficult to code because every card can have any arbitrary behavior designed to be
