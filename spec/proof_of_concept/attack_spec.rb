@@ -20,7 +20,7 @@ class AttackerCard < Card
       multiplier = 1 if multiplier.nil?
 
       self.attributes[:hp] = self.attributes[:hp] - (args[:damage] * multiplier)
-      args[:attacker_card].trigger_event(:receive_attack, { damage: 3 })
+      args[:attacker_card].trigger_event(event: :receive_attack, arguments: { damage: 3 })
       return {
         current_hp: self.attributes[:hp]
       }
@@ -34,7 +34,7 @@ describe Card do
   it "receives attack" do
     card = AttackerCard.new id: 11
     expect(card.attributes[:hp]).to eq 100
-    card.trigger_event(:receive_attack, { damage: 13 })
+    card.trigger_event(event: :receive_attack, arguments: { damage: 13 })
     expect(card.attributes[:hp]).to eq 87
   end
 
@@ -43,7 +43,7 @@ describe Card do
     card2 = AttackerCard.new id: 22
     expect(card1.attributes[:hp]).to eq 100
     expect(card2.attributes[:hp]).to eq 100
-    card1.trigger_event(:receive_attack_counterattack, {
+    card1.trigger_event(event: :receive_attack_counterattack, arguments: {
       damage: 13,
       attacker_card: card2
     })
@@ -61,7 +61,7 @@ describe Card do
     card2 = AttackerCard.new(id: 22, global_hooks: global_hooks)
     expect(card1.attributes[:hp]).to eq 100
     expect(card2.attributes[:hp]).to eq 100
-    card1.trigger_event(:receive_attack_counterattack, {
+    card1.trigger_event(event: :receive_attack_counterattack, arguments: {
       damage: 13,
       attacker_card: card2
     })

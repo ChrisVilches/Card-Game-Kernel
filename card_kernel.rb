@@ -38,7 +38,7 @@ class CardKernel
     return { transfer: false } if index == nil
     card = prev_container.cards[index]
 
-    transfer_result = card.trigger_event(:transfer, { prev_container: prev_container.nil?? nil : prev_container, next_container: next_container, card: card })
+    transfer_result = card.trigger_event(event: :transfer, arguments: { prev_container: prev_container.nil?? nil : prev_container, next_container: next_container, card: card })
 
     if transfer_result != false && transfer_result[:transfer] == true
       next_container.cards << card
@@ -50,9 +50,9 @@ class CardKernel
 
   end
 
-  
+
   def create_container(path)
-  
+
     if path.length == 1
       new_container = Container.new(id: path) # Remove ID
       @containers[path.first] = new_container
@@ -62,26 +62,26 @@ class CardKernel
     curr_container = @containers[path[0]]
     raise ContainerNotFound if curr_container.nil?
 
-    (1..path.length-2).each do |i|      
+    (1..path.length-2).each do |i|
       curr_container = curr_container.containers[path[i]]
       raise ContainerNotFound if curr_container.nil?
     end
-     
+
     new_container = Container.new(id: path) # Remove ID
     curr_container.containers[path.last] = new_container
 
     return new_container
-	
+
   end
-  
+
   def find_container(path)
 
     curr_container = @containers[path[0]]
     raise ContainerNotFound if curr_container.nil?
-    
+
     return curr_container if path.length == 1
-    
-    (1..path.length-1).each do |i|      
+
+    (1..path.length-1).each do |i|
       curr_container = curr_container.containers[path[i]]
       raise ContainerNotFound if curr_container.nil?
     end

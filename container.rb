@@ -15,8 +15,22 @@ class Container
     @id = id
     @global_hooks = global_hooks
     @global_hooks = GlobalHooks.new if @global_hooks.nil?
-	
+
     @containers = Hash.new;
+  end
+
+  def trigger_event(event:, arguments: {}, recursive: false)
+    @cards.each do |card|
+      card.trigger_event(event: event, arguments: arguments)
+    end
+
+    if recursive == true
+      @containers.each do |key, container|
+        container.trigger_event(event: event, arguments: arguments)
+      end
+    end
+
+    return nil
   end
 
   def add_card(card, from_container: nil)
@@ -25,7 +39,7 @@ class Container
       raise NullCard.new
     end
 
-    add_result = card.trigger_event(:transfer, {
+    add_result = card.trigger_event(event: :transfer, arguments: {
       prev_container: from_container.nil?? nil : from_container,
       next_container: self
       }

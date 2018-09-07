@@ -57,13 +57,13 @@ class Card
   # == Returns:
   # The merged Hash of every pre/post hook and the execution of the event handler itself.
   #
-  def trigger_event(event_name, arguments = {})
+  def trigger_event(event:, arguments: {})
 
     arguments[:card] = self
 
-    global_pre = @global_hooks.nil?? {} : @global_hooks.merge_all(:pre, event_name: event_name, arguments: arguments)
+    global_pre = @global_hooks.nil?? {} : @global_hooks.merge_all(:pre, event_name: event, arguments: arguments)
 
-    scope_pre = @pre.has_key?(event_name)? @pre[event_name].call(arguments) : {}
+    scope_pre = @pre.has_key?(event)? @pre[event].call(arguments) : {}
 
     return false if global_pre == false || scope_pre == false
 
@@ -75,10 +75,10 @@ class Card
     arguments = args
 
     result = {}
-    result = @events[event_name].call(arguments) if @events.has_key?(event_name)
+    result = @events[event].call(arguments) if @events.has_key?(event)
 
-    @global_hooks.merge_all(:post, event_name: event_name, arguments: arguments) if !@global_hooks.nil?
-    @post[event_name].call(arguments) if @post.has_key?(event_name)
+    @global_hooks.merge_all(:post, event_name: event, arguments: arguments) if !@global_hooks.nil?
+    @post[event].call(arguments) if @post.has_key?(event)
 
     return result
   end

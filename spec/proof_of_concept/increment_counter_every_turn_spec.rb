@@ -53,49 +53,49 @@ describe CardKernel do
 
     card1 = CounterIncrementorCard.new id: 1, global_hooks: global_hooks
     card2 = Card.new id: 2, type: :countable_card, global_hooks: global_hooks
-    
+
     b.add_card card1
     b.add_card card2
 
-    card1.trigger_event(:new_turn, { turn_number: 0 })
-    card2.trigger_event(:new_turn, { turn_number: 0 })
+    card1.trigger_event(event: :new_turn, arguments: { turn_number: 0 })
+    card2.trigger_event(event: :new_turn, arguments: { turn_number: 0 })
 
     expect(card2.attributes[:counter]).to be nil
 
-    card1.trigger_event(:new_turn, { turn_number: 1 })
-    card2.trigger_event(:new_turn, { turn_number: 1 })
+    card1.trigger_event(event: :new_turn, arguments: { turn_number: 1 })
+    card2.trigger_event(event: :new_turn, arguments: { turn_number: 1 })
 
     expect(card2.attributes[:counter]).to be nil
 
-    card1.trigger_event(:new_turn, { turn_number: 2 })
-    card2.trigger_event(:new_turn, { turn_number: 2 })
+    card1.trigger_event(event: :new_turn, arguments: { turn_number: 2 })
+    card2.trigger_event(event: :new_turn, arguments: { turn_number: 2 })
 
     expect(card2.attributes[:counter]).to be nil
 
-    card1.trigger_event(:new_turn, { turn_number: 3 })
-    card2.trigger_event(:new_turn, { turn_number: 3 })
+    card1.trigger_event(event: :new_turn, arguments: { turn_number: 3 })
+    card2.trigger_event(event: :new_turn, arguments: { turn_number: 3 })
 
     expect(card2.attributes[:counter]).to be nil
 
     k.transfer_by_ids(prev_container_id: [:a, :b], next_container_id: [:a], card_id: 1)
 
-    card1.trigger_event(:new_turn, { turn_number: 4 })
-    card2.trigger_event(:new_turn, { turn_number: 4 })
+    card1.trigger_event(event: :new_turn, arguments: { turn_number: 4 })
+    card2.trigger_event(event: :new_turn, arguments: { turn_number: 4 })
 
     expect(card2.attributes[:counter]).to be nil
 
-    card1.trigger_event(:new_turn, { turn_number: 5 })
-    card2.trigger_event(:new_turn, { turn_number: 5 })
+    card1.trigger_event(event: :new_turn, arguments: { turn_number: 5 })
+    card2.trigger_event(event: :new_turn, arguments: { turn_number: 5 })
 
     expect(card2.attributes[:counter]).to eq 1
 
-    card1.trigger_event(:new_turn, { turn_number: 6 })
-    card2.trigger_event(:new_turn, { turn_number: 6 })
+    card1.trigger_event(event: :new_turn, arguments: { turn_number: 6 })
+    card2.trigger_event(event: :new_turn, arguments: { turn_number: 6 })
 
     expect(card2.attributes[:counter]).to eq 1
 
-    card1.trigger_event(:new_turn, { turn_number: 7 })
-    card2.trigger_event(:new_turn, { turn_number: 7 })
+    card1.trigger_event(event: :new_turn, arguments: { turn_number: 7 })
+    card2.trigger_event(event: :new_turn, arguments: { turn_number: 7 })
 
     expect(card2.attributes[:counter]).to eq 2
 
