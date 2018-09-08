@@ -56,7 +56,7 @@ In order to prove this software can achieve a flexible way of developing any car
 
 Each card has a `transfer` event that executes whenever a card is transferred from one card container to another. In this case, the first container, and the next container could for instance be the attacking line, where you place all the cards that are going to attack the opponent.
 
-Once the card is transferred from the first container to the next, the `transfer` event is executed, and then optionally validate that the card is in the correct container, and then setup a `pre` hook for the `transfer` event where you only focus on the opponent's containers. In this case, this `pre` hook will return `false` in case the opponent is trying to transfer a card from one container to another (for example again, from his hand to his attacking line) and therefore achieving the objective proposed.
+Once the card is transferred from the first container to the next, the `transfer` event is executed, and then optionally validate that the card is in the correct container, and then setup a `pre` hook for the `transfer` event where you only focus on the opponent's containers. In this case, this `pre` hook will return `false` in case the opponent is trying to transfer a card from one container to another (for example again, from his hand to his attacking line) and therefore achieving the objective.
 
 Once the card that originated the `pre` hook is transferred away, the hook may be eliminated.
 
