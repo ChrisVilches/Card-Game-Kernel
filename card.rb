@@ -1,4 +1,5 @@
 require './global_hooks.rb'
+require './data_store.rb'
 
 # @markup markdown
 # @author FeloVilches
@@ -6,7 +7,7 @@ class Card
 
   attr_reader :id, :attributes, :type
 
-  def initialize(id:, type: nil, global_hooks: nil, set_data_callback: nil, get_data_callback: nil)
+  def initialize(id:, type: nil, global_hooks: nil, data_store: nil)
     @id = id
     @type = type
     @events = Hash.new
@@ -15,11 +16,8 @@ class Card
     @post = Hash.new
     @global_hooks = global_hooks
 
-    raise ArgumentError.new("Data setter callback should have an arity of 2") if !set_data_callback.nil? && set_data_callback.arity != 2
-    raise ArgumentError.new("Data getter callback should have an arity of 0") if !get_data_callback.nil? && get_data_callback.arity != 0
-
-    @set_data_callback = set_data_callback
-    @get_data_callback = get_data_callback
+    @data_store = data_store
+    @data_store = DataStore.new if @data_store.nil?
 
     on(:transfer, lambda { |args| return args.merge({ transfer: true }) })
   end
@@ -41,26 +39,19 @@ class Card
 
     arguments[:card] = self
 
-    global_pre = @global_hooks.nil?? {} : @global_hooks.merge_all(:pre, event_name: event, arguments: arguments)
+    pre_hooks_result = execute_pre_hooks(event: event, arguments: arguments)
 
-    scope_pre = @pre.has_key?(event)? @pre[event].call(arguments) : {}
+    return false if pre_hooks_result == false
 
-    return false if global_pre == false || scope_pre == false
+    arguments = merge_multiple_only_hashes(pre_hooks_result, arguments)
 
-    args = {}
-    args = args.merge(global_pre) if global_pre.is_a?(Hash)
-    args = args.merge(scope_pre) if scope_pre.is_a?(Hash)
-    args = args.merge(arguments) if arguments.is_a?(Hash)
+    result = @events.has_key?(event)? @events[event].call(arguments) : {}
 
-    arguments = args
+    result = merge_multiple_only_hashes arguments, result
 
-    result = {}
-    result = @events[event].call(arguments) if @events.has_key?(event)
+    post_hooks_result = execute_post_hooks(event: event, arguments: result)
 
-    @global_hooks.merge_all(:post, event_name: event, arguments: arguments) if !@global_hooks.nil?
-    @post[event].call(arguments) if @post.has_key?(event)
-
-    return result
+    return merge_multiple_only_hashes result, post_hooks_result
   end
 
 
@@ -82,6 +73,31 @@ class Card
 
 
   private
+
+  def execute_post_hooks(event:, arguments:)
+    global_post = @global_hooks.merge_all(:post, event_name: event, arguments: arguments) if !@global_hooks.nil?
+    scope_post = @post[event].call(arguments) if @post.has_key?(event)
+    return false if global_post == false || scope_post == false
+    merge_multiple_only_hashes global_post, scope_post
+  end
+
+  def execute_pre_hooks(event:, arguments:)
+    global_pre = @global_hooks.nil?? {} : @global_hooks.merge_all(:pre, event_name: event, arguments: arguments)
+    scope_pre = @pre.has_key?(event)? @pre[event].call(arguments) : {}
+    return false if global_pre == false || scope_pre == false
+    merge_multiple_only_hashes global_pre, scope_pre
+  end
+
+  def merge_multiple_only_hashes(*args)
+
+    result = {}
+
+    args.each do |a|
+      result = result.merge(a) if a.is_a?(Hash)
+    end
+
+    result
+  end
 
   # Registers an event handler for a specific event.
   #
@@ -113,17 +129,6 @@ class Card
 
     @events[event_name] = function
 
-  end
-
-
-  def set_data(action:, arguments: {})
-    return if @set_data_callback.nil?
-    @set_data_callback.call(action, arguments)
-  end
-
-  def get_data
-    return @get_data_callback.call if !@get_data_callback.nil?
-    return nil
   end
 
 

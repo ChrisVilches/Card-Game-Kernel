@@ -12,7 +12,7 @@ class StateChangerCard < Card
   end
 
   def custom_event(args)
-    set_data action: :push_new_state, arguments: { state_name: :choosing_card, predicate: lambda { |card|
+    @data_store.set_data action: :push_new_state, arguments: { state_name: :choosing_card, predicate: lambda { |card|
       card_hp = card.attributes[:hp]
       return false if card_hp.nil?
       return false if card_hp < 80
@@ -39,32 +39,46 @@ class StateReducer < Rydux::Reducer
   end
 end
 
+class StateDataStorage < DataStore
 
-Store = Rydux::Store.new(state: StateReducer)
+  def initialize
+    @store = Rydux::Store.new(state: StateReducer)
+  end
+
+  def set_data(action:, arguments: {})
+    @store.dispatch(type: action, payload: arguments)
+    get_data_lambda = lambda { Store.state }
+  end
+
+  def get_data
+    @store.state
+  end
+end
+
 
 
 describe CardKernel do
+
   it "makes a card trigger an event handler, which sets up a new temporary state, which is then removed, and the game continues" do
 
-    set_data_lambda = lambda { |action, arguments| Store.dispatch(type: action, payload: arguments) }
-    get_data_lambda = lambda { Store.state }
+    data_store = StateDataStorage.new
 
-    card1 = StateChangerCard.new id: 1, set_data_callback: set_data_lambda, get_data_callback: get_data_lambda
+    card1 = StateChangerCard.new id: 1, data_store: data_store
 
-    expect(get_data_lambda.call()[:state][:history].length).to be 0
+    expect(data_store.get_data()[:state][:history].length).to be 0
 
     # The game goes through 3 phases (generic)
 
-    set_data_lambda.call(:push_new_state, { state_name: :stage1 })
-    expect(get_data_lambda.call()[:state][:history].length).to be 1
+    data_store.set_data(action: :push_new_state, arguments: { state_name: :stage1 })
+    expect(data_store.get_data()[:state][:history].length).to be 1
 
-    set_data_lambda.call(:push_new_state, { state_name: :stage2 })
-    expect(get_data_lambda.call()[:state][:history].length).to be 2
+    data_store.set_data(action: :push_new_state, arguments: { state_name: :stage2 })
+    expect(data_store.get_data()[:state][:history].length).to be 2
 
-    set_data_lambda.call(:push_new_state, { state_name: :stage3 })
-    expect(get_data_lambda.call()[:state][:history].length).to be 3
+    data_store.set_data(action: :push_new_state, arguments: { state_name: :stage3 })
+    expect(data_store.get_data()[:state][:history].length).to be 3
 
-    expect(get_data_lambda.call()[:state][:history].last()[:state_name]).to be :stage3
+    expect(data_store.get_data()[:state][:history].last()[:state_name]).to be :stage3
 
     # Then something happens, and card1 has an event triggered, which dispatches some data that modifies the data store.
     # As a result, a new state is pushed onto the history stack
@@ -72,16 +86,16 @@ describe CardKernel do
     card1.trigger_event event: :custom_event, arguments: {}
 
     # Assert the state name was changed by the card
-    expect(get_data_lambda.call()[:state][:history].last()[:state_name]).to be :choosing_card
+    expect(data_store.get_data()[:state][:history].last()[:state_name]).to be :choosing_card
 
     # This is state is for choosing a card from the deck, but only certain cards.
     # A predicate (lambda) was passed, so we can use that predicate to filter out non eligible cards.
     # But for now, we are fine just checking there's a predicate stored somewhere.
-    expect(get_data_lambda.call()[:state][:history].last()[:predicate].class).to eq Proc
+    expect(data_store.get_data()[:state][:history].last()[:predicate].class).to eq Proc
 
     # The process of choosing a card finished, so we go back to our previous state
-    set_data_lambda.call(:pop_state, { })
-    expect(get_data_lambda.call()[:state][:history].last()[:state_name]).to be :stage3
+    data_store.set_data(action: :pop_state, arguments: { })
+    expect(data_store.get_data()[:state][:history].last()[:state_name]).to be :stage3
 
     # From here, the user could finish stage3 by doing more things, or simply go straight into stage4.
     # It depends on the particular logic.

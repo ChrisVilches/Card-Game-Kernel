@@ -87,6 +87,84 @@ Since cards can communicate with the global data, a card can directly push a new
 
 If the card that triggered this state change wants to limit or filter out some cards (for example, choosing cards that are stronger than 120 is prohibited), we can also use the global data store and set a predicate (lambda function) there, so it can be accessed and used from outside. Just make sure the application logic knows about that predicate, so it can find and use it.
 
+## API Example
+
+Let's create a global data store using the Rydux gem. You can create your own data store as long as it implements the methods defined in the `DataStore` class.
+
+```ruby
+class PlayerReducer < Rydux::Reducer
+  def self.map_state(action, state = { gold: 0, level: 1, bonus: 0 })
+    case action[:type]
+    when :increment_gold
+      gold = state[:gold]
+      state.merge(gold: gold + 1)
+    when :decrement_gold
+      gold = state[:gold]
+      state.merge(gold: gold - 1)
+    when :level_up
+      level = state[:level]
+      bonus = state[:bonus]
+      bonus = bonus + 1 if level % 10 == 0 # Bonus +1 each time it goes 10 levels up
+      state.merge(level: level + 1, bonus: bonus)
+    else
+      state
+    end
+  end
+end
+
+# And then
+
+class MyDataStorage < DataStore
+
+  def initialize
+    @store = Rydux::Store.new(player1: PlayerReducer, player2: PlayerReducer)
+  end
+
+  def set_data(action:, arguments: {})
+    @store.dispatch(type: action, payload: arguments)
+    get_data_lambda = lambda { Store.state }
+  end
+
+  def get_data
+    {
+      player1: @store.player1,
+      player2: @store.player2
+    }    
+  end
+end
+
+```
+
+Now let's make some card containers. All the cards in the game are separated into containers, and these can be nested.
+
+```ruby
+kernel = CardKernel.new
+
+kernel.create_container [:player1]
+kernel.create_container [:player1, :hand]
+kernel.create_container [:player1, :deck]
+
+kernel.create_container [:player2]
+kernel.create_container [:player2, :hand]
+kernel.create_container [:player2, :deck]
+
+kernel.create_container [:shared_cards]
+```
+
+Let's now add some cards to the containers.
+
+```ruby
+
+container = kernel.create_container [:player1, :hand]
+
+# ...
+
+container.add_card(Card.new(id: 1))
+container.add_card(Card.new(id: 2))
+container.add_card(Card.new(id: 3))
+```
+
+
 ## Install
 
 Install gems using the following command.

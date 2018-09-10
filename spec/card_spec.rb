@@ -1,18 +1,34 @@
 require_relative '../card'
 require_relative '../card_kernel'
 require_relative '../container'
+require_relative '../data_store'
+
+class FakeDataStorage < DataStore
+
+  def initialize
+    @data = Hash.new
+  end
+
+  def set_data(action:, arguments: {})
+    @data[:string] = "Hi #{action}";
+  end
+
+  def get_data
+    @data
+  end
+end
 
 class DataSenderCard < Card
-  def initialize(id: 1, set_data_callback: nil, get_data_callback: nil)
+  def initialize(id: 1, data_store: nil)
     super
 
     data_set_lambda = ->(args) {
-      set_data(action: "banana", arguments: {}) if args[:type] == :fruit
-      set_data(action: "car", arguments: {}) if args[:type] == :vehicle
+      @data_store.set_data(action: "banana", arguments: {}) if args[:type] == :fruit
+      @data_store.set_data(action: "car", arguments: {}) if args[:type] == :vehicle
     }
 
     data_get_lambda = ->(args) {
-      get_data
+      @data_store.get_data
     }
 
     on :something_happens, data_set_lambda
@@ -38,16 +54,7 @@ end
 
 describe Card do
 
-  it "should raise an error if data callbacks have a wrong arity" do
-
-    no_arg = lambda { return }
-    one_arg = lambda { |a| return }
-    two_arg = lambda { |a, b| return }
-
-    expect {DataSenderCard.new(set_data_callback: one_arg, get_data_callback: nil)}.to raise_error ArgumentError
-    expect {DataSenderCard.new(set_data_callback: nil, get_data_callback: one_arg)}.to raise_error ArgumentError
-    DataSenderCard.new(set_data_callback: two_arg, get_data_callback: no_arg)
-  end
+  pending "Trigger event method is a bit messy the way it blends/merges the arguments with the results each time hooks (or the main event handler) are executed. Test this."
 
   describe "arity validators" do
 
@@ -74,13 +81,9 @@ describe Card do
 
   it "sends data to its data callback successfully" do
 
-    data_store = Hash.new
+    fake_data = FakeDataStorage.new
 
-    data_card = DataSenderCard.new(
-      id: 1,
-      set_data_callback: lambda { |action, args| data_store[:string] = "Hi #{action}"; return; },
-      get_data_callback: lambda { data_store }
-    )
+    data_card = DataSenderCard.new(data_store: fake_data)
 
     data_card.trigger_event(event: :something_happens, arguments: { type: :fruit })
     retrieved_data_store = data_card.trigger_event(event: :should_get_data, arguments: {})
