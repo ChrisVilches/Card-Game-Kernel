@@ -8,7 +8,10 @@ class AttackerCard < Card
     set_attributes({ hp: 100 })
     on(:receive_attack, lambda { |args|
 
-      self.attributes[:hp] = self.attributes[:hp] - args[:damage]
+      current_hp = self.attributes[:hp]
+
+      set_attributes({ hp: current_hp - args[:damage] })
+
       return {
         current_hp: self.attributes[:hp]
       }
@@ -19,7 +22,10 @@ class AttackerCard < Card
       multiplier = args[:damage_multiplier]
       multiplier = 1 if multiplier.nil?
 
-      self.attributes[:hp] = self.attributes[:hp] - (args[:damage] * multiplier)
+      current_hp = self.attributes[:hp]
+
+      set_attributes({ hp: current_hp - (args[:damage] * multiplier) })
+
       args[:attacker_card].trigger_event(event: :receive_attack, arguments: { damage: 3 })
       return {
         current_hp: self.attributes[:hp]

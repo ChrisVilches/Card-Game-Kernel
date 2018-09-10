@@ -10,6 +10,12 @@
   * [Increment a card's counter every turn](#increment-a-cards-counter-every-turn)
   * [Attack the opponent's card](#attack-the-opponents-card)
   * [Pushing a state that makes the application change its course (must be handled by the application logic)](#pushing-a-state-that-makes-the-application-change-its-course-must-be-handled-by-the-application-logic)
+- [API Example](#api-example)
+  * [Global data store](#global-data-store)
+  * [Containers](#containers)
+  * [Cards](#cards)
+  * [Hooks](#hooks)
+  * [Triggering events](#triggering-events)
 - [Install](#install)
 - [Tests](#tests)
 
@@ -89,6 +95,8 @@ If the card that triggered this state change wants to limit or filter out some c
 
 ## API Example
 
+### Global data store
+
 Let's create a global data store using the Rydux gem. You can create your own data store as long as it implements the methods defined in the `DataStore` class.
 
 ```ruby
@@ -132,10 +140,11 @@ class MyDataStorage < DataStore
     }    
   end
 end
-
 ```
 
-Now let's make some card containers. All the cards in the game are separated into containers, and these can be nested.
+### Containers
+
+Here we'll make some card containers. All the cards in the game are separated into containers, and these can be nested.
 
 ```ruby
 kernel = CardKernel.new
@@ -157,13 +166,85 @@ Let's now add some cards to the containers.
 
 container = kernel.create_container [:player1, :hand]
 
-# ...
+# Use the data storage class we created before
 
-container.add_card(Card.new(id: 1))
-container.add_card(Card.new(id: 2))
-container.add_card(Card.new(id: 3))
+my_data = MyDataStorage.new
+
+container.add_card(Card.new(id: 1, data_store: my_data))
+container.add_card(Card.new(id: 2, data_store: my_data))
+container.add_card(Card.new(id: 3, data_store: my_data))
 ```
 
+### Cards
+
+The `Card` class can be overridden and you can define detailed behavior by registering events (and its handlers) to which this class of cards will react to.
+
+Here we create a type of card that can receive damage.
+
+```ruby
+class AttackerCard < Card
+
+  def initialize(id:)
+    super(id: id)
+
+    # This card has a custom attribute, health points (HP)
+    set_attributes({ hp: 100 })
+
+    # Event handler for when it receives an attack.
+    # We register the event by its name, and then define an event handler for when it's triggered.
+    on(:receive_attack, lambda { |args|
+
+      # Decrement its health points (HP)
+      current_hp = self.attributes[:hp]
+      set_attributes({ hp: current_hp - args[:damage] })
+
+      # Counter attack by triggering the same event on the card that attacked first
+      if args.has_key?(:can_counterattack) && args[:can_counterattack] == true
+        args[:attacker_card].trigger_event(event: :receive_attack,
+          arguments: {
+            damage: 3,
+            can_counterattack: false # If this is true, it'd become an infinite loop
+          })
+      end
+
+      return {
+        current_hp: self.attributes[:hp]
+      }
+    })
+
+  end
+end
+```
+
+Of course instances of this newly created class can also be added to containers.
+
+### Hooks
+
+Hooks are functions that execute before and after the main event handler. This allows you to control more precisely what happens before and after an event. You can do things like blocking an event from happening, or doing some pre-processing logic that will change the way the main event handler behaves.
+
+Hooks can be configured at a global scope, and a per card scope. Once an event is triggered, the order in which these execute is as follows.
+
+```
+global pre hook → card pre hook → main event handler → global post hook → card post hook
+```
+
+**Examples coming soon...**
+
+### Triggering events
+
+Trigger an event for one card.
+
+```ruby
+card_instance.trigger_event(event: :event_name_goes_here, arguments: { arg1: 0, arg2: "hoge", arg3: "piyo" })
+```
+
+Trigger an event for all cards in a container.
+
+```ruby
+container_instance.trigger_event(event: :event_name_goes_here, arguments: { arg1: 0, arg2: "hoge", arg3: "piyo" }, recursive: false)
+```
+
+Note the `recursive` argument when triggering an event in a container. If it's `false`, it will only trigger the event for all cards inside that container, but will not trigger it for the cards inside the nested containers. If it's `true`, the event will be triggered for every card in the container and all cards in every container nested to it.
 
 ## Install
 
