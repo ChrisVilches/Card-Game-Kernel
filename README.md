@@ -39,8 +39,8 @@ understood verbally by a human being (and therefore difficult to understand for 
 
 This little software contains a framework where it's possible to design and code nearly any card game you can imagine. Some of the features:
 
-* You can create your own `events` and then trigger them whenever you want.
-* Cards are divided into `containers` which are a more generic way of dividing a deck into your hand, the opponent's hand, disposed cards, etc.
+* Cards have **events**, which are the main mechanism of communicating between cards, and achieving the desired behavior. Events can be triggered from many places, and a lot of customization is possible.
+* Cards are divided into **containers** which are a more generic way of dividing a deck into your hand, the opponent's hand, disposed cards, etc.
 * Containers can be nested, and they can be found by their path, e.g. `[:player1, :hand]` or `[:player2, :cemetery]`
 * It manages data and state globally using Redux (or a similar data store).
 * Attributes can be added dynamically to cards.
