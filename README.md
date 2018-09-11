@@ -239,7 +239,8 @@ card = Card.new(id: 1, global_hooks: global_hooks)
 
 lambda_hook = lambda { |args|
 
-  # The transfer event will always contain the "prev_container" and the "next_container" attributes in its argument object.
+  # The transfer event will contain the "prev_container" and the "next_container" attributes in its argument object.
+  # "prev_container" won't be included if it's the first time the card is put into a container.
   # The "card" attribute will be the card where the hooks are executing.
   if (!args[:prev_container].nil? && args[:prev_container].id == [:b]) && args[:next_container].id == [:b, :c] && args[:card].type == :my_type
     return false
