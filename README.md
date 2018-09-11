@@ -46,7 +46,7 @@ This little software contains a framework where it's possible to design and code
 * Attributes can be added dynamically to cards.
 * Events can have `pre` and `post` hooks so you can control the execution with detail.
 * Generic, unopinionated solution.
-* It can also be used for games that require a similar mechanism, like Final Fantasy or Pokemon battle systems, which require to implement many techniques and movements which behavior differ significantly from each other and there's no standard reusable model.
+* It can also be used for games that require a similar mechanism, like Final Fantasy or Pokemon battle systems, which require to implement many techniques and movements which behavior differs significantly from each other and there's no standard reusable model.
 
 This is a very low level software, and therefore in order to work with it, further layers of abstraction must be written by the developer. This engine doesn't even force you to implement the concept of `turns` or `deck`. You simply have a few data structures that communicate with each other, and you must write the rest of the logic yourself.
 
