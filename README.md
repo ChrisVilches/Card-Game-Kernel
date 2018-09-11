@@ -230,7 +230,7 @@ global pre hook → card pre hook → main event handler → global post hook �
 
 Creating a global hook. This hook will be executed for each card that has the `transfer` event triggered. Since it was
 registered using the `pre` symbol, it will execute before the main event handler for `transfer`. Also note that `transfer` is
-a special event that executes automatically (no need to execute `card.trigger_event(...)` when a card is moved from one container
+a special event that executes automatically (no need to execute `card.trigger_event(...)`) when a card is moved from one container
 to another.
 
 ```ruby
