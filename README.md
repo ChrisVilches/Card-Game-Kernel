@@ -228,6 +228,26 @@ Hooks can be configured at a global scope, and a per card scope. Once an event i
 global pre hook → card pre hook → main event handler → global post hook → card post hook
 ```
 
+Creating a global hook.
+
+```ruby
+global_hooks = GlobalHooks.new
+card = Card.new(id: 1, global_hooks: global_hooks)
+
+lambda_hook = lambda { |args|
+
+  # The transfer event will always contain the "prev_container" and the "next_container" attributes in its argument object.
+  # The "card" attribute will be the card where the hooks are executing.
+  if (!args[:prev_container].nil? && args[:prev_container].id == [:b]) && args[:next_container].id == [:b, :c] && args[:card].type == :my_type
+    return false
+  end
+
+  return true
+}
+
+global_hooks.append_hook(:pre, event_name: :transfer, fn: lambda_hook, card_owner_id: 1)
+```
+
 **Examples coming soon...**
 
 ### Triggering events
