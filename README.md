@@ -228,7 +228,10 @@ Hooks can be configured at a global scope, and a per card scope. Once an event i
 global pre hook → card pre hook → main event handler → global post hook → card post hook
 ```
 
-Creating a global hook.
+Creating a global hook. This hook will be executed for each card that has the `transfer` event triggered. Since it was
+registered using the `pre` symbol, it will execute before the main event handler for `transfer`. Also note that `transfer` is
+a special event that executes automatically (no need to execute `card.trigger_event(...)` when a card is moved from one container
+to another.
 
 ```ruby
 global_hooks = GlobalHooks.new
@@ -245,10 +248,24 @@ lambda_hook = lambda { |args|
   return true
 }
 
+# "card_owner_id" is optional, as some global hooks don't need to be associated with any card in particular.
 global_hooks.append_hook(:pre, event_name: :transfer, fn: lambda_hook, card_owner_id: 1)
 ```
 
-**Examples coming soon...**
+Creating a card scoped hook. Similarly, you can register a lambda function as a `pre` hook inside a card.
+It will execute only for instances of this card class.
+
+```ruby
+class PreHookCard < Card
+  def initialize(id:)
+    super(id: id)
+    @pre[:transfer] = lambda { |args_|
+      # ...
+    }
+  end
+end
+```
+
 
 ### Triggering events
 
